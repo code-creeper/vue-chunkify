@@ -3,5 +3,5 @@
 </script>
 
 <template>
-    <h1>File Input</h1>
+    <h1>File Input2</h1>
 </template>
