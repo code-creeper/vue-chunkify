@@ -1,3 +1,4 @@
 declare module 'vue-chunkify' {
-    export const Chunkify: any;
+    import type { DefineComponent } from 'vue'
+    export const Chunkify: DefineComponent<{}, {}, any>
 }

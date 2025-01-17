@@ -18,11 +18,11 @@
   "peerDependencies": {
     "vue": "^3.0.0"
   },
+  "main": "dist/chunkify.umd.js",
+  "types": "src/index.d.ts",
   "exports": {
+    "types": "./src/index.d.ts",
     "import": "./dist/chunkify.es.js",
-    "require": "./dist/chunkify.umd.js",
-    "types": "./src/index.d.ts"
-  },
-  "main": "dist/chunkify.es.js",
-  "types": "src/index.d.ts"
+    "require": "./dist/chunkify.umd.js"
+  }
 }
