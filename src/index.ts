@@ -1,11 +1,12 @@
-import type { App } from 'vue';
+import type { App, Plugin } from 'vue';
 import Chunkify from './components/Chunkify.vue';
 
-
-export default {
-    install: (app: App): void => {
+const ChunkifyPlugin: Plugin = {
+    install: (app: App) => {
+        console.log('installing vue-chunkify');
         app.component('Chunkify', Chunkify);
-    }
-}
+    } 
+};
 
+export default ChunkifyPlugin
 export { Chunkify };

@@ -8,7 +8,7 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'Chunkify',
-      fileName: (format) => `chunkify.${format}.js`,
+      fileName: (format) => `vue-chunkify.${format}.js`,
     },
     rollupOptions: {
       external: ['vue'],

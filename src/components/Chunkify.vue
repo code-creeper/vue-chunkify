@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+console.log("logging from inside the component")
 </script>
 
 <template>
