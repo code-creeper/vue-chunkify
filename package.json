@@ -17,7 +17,8 @@
     "vue-tsc": "^2.2.0"
   },
   "peerDependencies": {
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "axios": "^1.0.0"
   },
   "main": "dist/vue-chunkify.umd.js",
   "module": "dist/vue-chunkify.es.js",
@@ -46,6 +47,7 @@
     "package.json"
   ],
   "dependencies": {
-    "@types/node": "^22.10.7"
+    "@types/node": "^22.10.7",
+    "axios": "^1.7.9"
   }
 }

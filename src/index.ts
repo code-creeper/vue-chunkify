@@ -1,10 +1,10 @@
 import type { App, Plugin } from 'vue';
 import Chunkify from './components/Chunkify.vue';
-import type { PluginOptions } from './types.ts';
+import type { ChunkifyOptions } from './types.ts';
 
 const ChunkifyPlugin: Plugin = {
-    install: (app: App, options: PluginOptions = {}) => {
-        console.log('installing vue-chunkify', options);
+    install: (app: App, options: ChunkifyOptions = {}) => {
+        app.provide('ChunkifyOptions', options);
         app.component('Chunkify', Chunkify);
     } 
 };
