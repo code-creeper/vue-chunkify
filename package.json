@@ -13,6 +13,7 @@
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.6.2",
     "vite": "^6.0.5",
+    "vite-plugin-dts": "^4.5.0",
     "vue-tsc": "^2.2.0"
   },
   "peerDependencies": {
@@ -20,10 +21,31 @@
   },
   "main": "dist/vue-chunkify.umd.js",
   "module": "dist/vue-chunkify.es.js",
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
-    "types": "./src/index.d.ts",
-    "import": "./dist/vue-chunkify.es.js",
-    "require": "./dist/vue-chunkify.umd.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-chunkify.es.js",
+      "require": "./dist/vue-chunkify.umd.js"
+    },
+    "./*": [
+      "./*",
+      "./*.d.ts"
+    ]
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "dependencies": {
+    "@types/node": "^22.10.7"
   }
 }
