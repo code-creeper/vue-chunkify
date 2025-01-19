@@ -17,6 +17,7 @@ export type ChunkifyFile = {
   url: string;
   progress?: number;
   abortController: AbortController;
+  abort: () => void;
 };
 
 export type Chunk = {

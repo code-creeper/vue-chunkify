@@ -13,7 +13,7 @@ import axios, {
   type Method,
 } from "axios";
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["select"]);
 
 const props = defineProps<ChunkifyOptions>();
 
@@ -35,9 +35,12 @@ const handleChange = async (e: Event) => {
     url: URL.createObjectURL(file),
     progress: 0,
     abortController: new AbortController(),
+    abort: () => {
+      
+    },
   }));
 
-  emit("change", chunkify);
+  emit("select", chunkify);
 
   const method = props.method || "get";
   const route = props.route || "";
