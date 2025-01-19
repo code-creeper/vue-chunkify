@@ -1,47 +1,31 @@
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
-import type { ChunkifyOptions } from "../types";
+import { computed, inject, reactive, ref } from "vue";
+import type {
+  ChunkifyOptions,
+  ChunkifyFile,
+  ChunkProgress,
+  Chunk,
+} from "../types";
 import axios, {
   type AxiosProgressEvent,
   type AxiosResponse,
   type Method,
 } from "axios";
 
-type ChunkifyFile = {
-  rawFile: File;
-  uuid: string;
-  file_name: string;
-  file_size: number;
-  file_type: string;
-  url: string;
-  progress?: number;
-  abortController: AbortController;
-};
-
-type Chunk = {
-  data: Blob;
-  reference: string;
-  total: number;
-  index: number;
-};
-
-type ChunkProgress = {
-  reference: string;
-  progress: number;
-  index: number;
-};
+const emit = defineEmits(["change"]);
 
 const props = defineProps<ChunkifyOptions>();
 
-const files = ref<ChunkifyFile[]>([]);
-
+const chunkify = reactive({
+  files: ref<ChunkifyFile[]>([]),
+});
 const chunkProgress: ChunkProgress[] = [];
 
 const handleChange = async (e: Event) => {
   const input = e.target as HTMLInputElement;
   if (!input.files) return;
 
-  files.value = Array.from(input.files).map((file: File) => ({
+  chunkify.files = Array.from(input.files).map((file: File) => ({
     rawFile: file,
     uuid: Math.random().toString(36).substring(2),
     file_name: file.name,
@@ -52,12 +36,14 @@ const handleChange = async (e: Event) => {
     abortController: new AbortController(),
   }));
 
+  emit("change", chunkify);
+
   const method = props.method || "get";
   const route = props.route || "";
   const chunkSize = props.chunkSize || 1024 * 1024;
   const chunkQueue: Chunk[] = [];
 
-  files.value.forEach((file) => {
+  chunkify.files.forEach((file) => {
     breakFilesIntoChunks(file);
   });
 
@@ -85,13 +71,26 @@ const handleChange = async (e: Event) => {
   }
 
   async function uploadQueue(queue: Chunk[]) {
-    const tasks = queue
-      .splice(0, parseInt(props.numberOfChunks as string) || 1)
-      .map(uploadChunk);
-    await Promise.all(tasks);
+    const maxConcurrentUploads = parseInt(props.numberOfChunks as string) || 1; // Max concurrent uploads
+    const activeUploads: Set<Promise<void>> = new Set();
 
-    if (queue.length) {
-      await uploadQueue(queue);
+    while (queue.length > 0 || activeUploads.size > 0) {
+      // Start new uploads if slots are available
+      while (activeUploads.size < maxConcurrentUploads && queue.length > 0) {
+        const chunk = queue.shift();
+        if (chunk) {
+          const uploadTask = uploadChunk(chunk)
+            .finally(() => {
+              activeUploads.delete(uploadTask); // Remove from activeUploads when complete
+            });
+          activeUploads.add(uploadTask);
+        }
+      }
+
+      // Wait for at least one upload to finish
+      if (activeUploads.size >= maxConcurrentUploads || queue.length === 0) {
+        await Promise.race(activeUploads);
+      }
     }
   }
 
@@ -109,7 +108,8 @@ const handleChange = async (e: Event) => {
         const progress = Math.round((e.loaded * 100) / (e.total || 1));
 
         const chunkProgressIndex = chunkProgress.findIndex(
-          (item) => item.reference === chunk.reference && item.index === chunk.index
+          (item) =>
+            item.reference === chunk.reference && item.index === chunk.index
         );
 
         if (chunkProgressIndex === -1) {
@@ -121,23 +121,23 @@ const handleChange = async (e: Event) => {
         } else {
           chunkProgress[chunkProgressIndex].progress = progress;
         }
-        
 
-        const file = files.value.find((file) => file.uuid === chunk.reference);
+        const file = chunkify.files.find(
+          (file) => file.uuid === chunk.reference
+        );
 
         if (file) {
-
-
           file.progress = Math.round(
-            chunkProgress.filter(
-              (item: ChunkProgress) => item.reference === chunk.reference
-            ).reduce(
-              (acc, item) => acc + item.progress, 0
-            ) / chunk.total
+            chunkProgress
+              .filter(
+                (item: ChunkProgress) => item.reference === chunk.reference
+              )
+              .reduce((acc, item) => acc + item.progress, 0) / chunk.total
           );
         }
       },
-      signal: files.value.find(file => file.uuid === chunk.reference)?.abortController.signal,
+      signal: chunkify.files.find((file) => file.uuid === chunk.reference)
+        ?.abortController.signal,
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -148,6 +148,5 @@ const handleChange = async (e: Event) => {
 </script>
 
 <template>
-  <pre>{{ files }}</pre>
   <input type="file" :multiple="props.multiple" @change="handleChange" />
 </template>
