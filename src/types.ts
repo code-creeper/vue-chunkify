@@ -5,6 +5,7 @@ export type ChunkifyOptions = {
     parallel?: boolean;
     numberOfChunks?: number | string;
     chunkSize?: number | string;
+    maxRetries?: number | string;
 };
 
 export type ChunkifyFile = {

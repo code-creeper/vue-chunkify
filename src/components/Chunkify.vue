@@ -7,6 +7,7 @@ import type {
   Chunk,
 } from "../types";
 import axios, {
+  AxiosError,
   type AxiosProgressEvent,
   type AxiosResponse,
   type Method,
@@ -42,6 +43,7 @@ const handleChange = async (e: Event) => {
   const route = props.route || "";
   const chunkSize = props.chunkSize || 1024 * 1024;
   const chunkQueue: Chunk[] = [];
+  const maxRetries = parseInt(props.maxRetries as string) || 3;
 
   chunkify.files.forEach((file) => {
     breakFilesIntoChunks(file);
@@ -79,7 +81,7 @@ const handleChange = async (e: Event) => {
       while (activeUploads.size < maxConcurrentUploads && queue.length > 0) {
         const chunk = queue.shift();
         if (chunk) {
-          const uploadTask = uploadChunk(chunk)
+          const uploadTask = uploadChunk(chunk, maxRetries)
             .finally(() => {
               activeUploads.delete(uploadTask); // Remove from activeUploads when complete
             });
@@ -94,13 +96,13 @@ const handleChange = async (e: Event) => {
     }
   }
 
-  async function uploadChunk(chunk: Chunk) {
+  async function uploadChunk(chunk: Chunk, restries: number) {
     const formData = new FormData();
     formData.append("file", chunk.data);
     formData.append("reference", chunk.reference);
     formData.append("index", chunk.index.toString());
 
-    const response: AxiosResponse = await axios({
+    axios({
       method: method as Method,
       url: route,
       data: formData,
@@ -138,11 +140,13 @@ const handleChange = async (e: Event) => {
       },
       signal: chunkify.files.find((file) => file.uuid === chunk.reference)
         ?.abortController.signal,
-    });
+    }).then((response: AxiosResponse) => {
 
-    if (response.status >= 200 && response.status < 300) {
-      console.log("Chunk uploaded successfully");
-    }
+    }).catch((error: AxiosError) => {
+      if (restries > 0) {
+          uploadChunk(chunk, restries - 1);
+        }
+    });
   }
 };
 </script>
