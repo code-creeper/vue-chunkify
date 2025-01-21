@@ -1,4 +1,4 @@
-export type ChunkifyOptions = {
+type ChunkifyOptions = {
     route?: string;
     method?: string;
     multiple?: boolean;
@@ -8,7 +8,7 @@ export type ChunkifyOptions = {
     maxRetries?: number | string;
 };
 
-export type ChunkifyFile = {
+type ChunkifyFile = {
   rawFile: File;
   uuid: string;
   file_name: string;
@@ -20,17 +20,25 @@ export type ChunkifyFile = {
   abort: () => void;
 };
 
-export type Chunk = {
+type Chunk = {
   data: Blob;
   reference: string;
   total: number;
   index: number;
 };
 
-export type ChunkProgress = {
+type ChunkProgress = {
   reference: string;
   progress: number;
   index: number;
 };
 
-export type Status = 'pending' | 'uploading' | 'completed' | 'failed';
+type Status = 'pending' | 'uploading' | 'completed' | 'failed';
+
+export type {
+    ChunkifyOptions,
+    ChunkifyFile,
+    Chunk,
+    ChunkProgress,
+    Status
+}

@@ -1,6 +1,6 @@
 import type { App, Plugin } from 'vue';
 import Chunkify from './components/Chunkify.vue';
-import type { ChunkifyOptions } from './types.ts';
+import type { ChunkifyOptions } from './types';
 
 const ChunkifyPlugin: Plugin = {
     install: (app: App, options: ChunkifyOptions = {}) => {
@@ -11,4 +11,4 @@ const ChunkifyPlugin: Plugin = {
 
 export default ChunkifyPlugin
 export { Chunkify };
-export * from './types.ts'; // can not delete
+export * from './types'; // can not delete
