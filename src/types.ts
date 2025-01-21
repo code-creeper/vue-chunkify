@@ -33,7 +33,4 @@ export type ChunkProgress = {
   index: number;
 };
 
-export type Chunkify = {
-  files: ChunkifyFile[];
-  chunkProgress: ChunkProgress[];
-}
+export type Status = 'pending' | 'uploading' | 'completed' | 'failed';

@@ -5,6 +5,7 @@ import type {
   ChunkifyFile,
   ChunkProgress,
   Chunk,
+  Status,
 } from "../types";
 import axios, {
   AxiosError,
@@ -13,20 +14,18 @@ import axios, {
   type Method,
 } from "axios";
 
-const emit = defineEmits(["select"]);
+const emit = defineEmits(['select', 'uploading', 'completed', 'error']);
 
 const props = defineProps<ChunkifyOptions>();
-
-const chunkify = reactive({
-  files: ref<ChunkifyFile[]>([]),
-});
+const files = ref<ChunkifyFile[]>([]);
 const chunkProgress: ChunkProgress[] = [];
+let status: Status = 'pending';
 
 const handleChange = async (e: Event) => {
   const input = e.target as HTMLInputElement;
   if (!input.files) return;
 
-  chunkify.files = Array.from(input.files).map((file: File) => ({
+  files.value = Array.from(input.files).map((file: File) => ({
     rawFile: file,
     uuid: Math.random().toString(36).substring(2),
     file_name: file.name,
@@ -40,19 +39,24 @@ const handleChange = async (e: Event) => {
     },
   }));
 
-  emit("select", chunkify);
+  emit('select', files.value);
 
-  const method = props.method || "get";
-  const route = props.route || "";
+  const method = props.method || 'get';
+  const route = props.route || '';
   const chunkSize = props.chunkSize || 1024 * 1024;
   const chunkQueue: Chunk[] = [];
   const maxRetries = parseInt(props.maxRetries as string) || 3;
 
-  chunkify.files.forEach((file) => {
+  status = 'uploading';
+
+  files.value.forEach((file) => {
     breakFilesIntoChunks(file);
   });
 
   await uploadQueue(chunkQueue);
+
+  status = 'completed';
+  emit('completed');
 
   async function breakFilesIntoChunks(file: ChunkifyFile) {
     const totalChunks = Math.ceil(
@@ -105,7 +109,7 @@ const handleChange = async (e: Event) => {
     formData.append("reference", chunk.reference);
     formData.append("index", chunk.index.toString());
 
-    axios({
+    await axios({
       method: method as Method,
       url: route,
       data: formData,
@@ -127,7 +131,7 @@ const handleChange = async (e: Event) => {
           chunkProgress[chunkProgressIndex].progress = progress;
         }
 
-        const file = chunkify.files.find(
+        const file = files.value.find(
           (file) => file.uuid === chunk.reference
         );
 
@@ -141,7 +145,7 @@ const handleChange = async (e: Event) => {
           );
         }
       },
-      signal: chunkify.files.find((file) => file.uuid === chunk.reference)
+      signal: files.value.find((file) => file.uuid === chunk.reference)
         ?.abortController.signal,
     }).then((response: AxiosResponse) => {
 
@@ -152,6 +156,25 @@ const handleChange = async (e: Event) => {
     });
   }
 };
+
+const abort = (reference?: string): void => {
+  if (reference) {
+    const fileIndex = files.value.findIndex((file) => file.uuid === reference);
+    if (fileIndex !== -1) {
+      files.value[fileIndex].abortController.abort();
+    }
+  } else {
+    files.value.forEach((file) => {
+      file.abortController.abort();
+    });
+  }
+};
+
+defineExpose({
+  abort,
+  status,
+  files,
+});
 </script>
 
 <template>
