@@ -17,13 +17,15 @@ type ChunkifyFile = {
   url: string;
   progress?: number;
   abortController: AbortController;
+
   abort: () => void;
 };
 
 type Chunk = {
   data: Blob;
   reference: string;
-  total: number;
+  extension?: string;
+  total_count: number;
   index: number;
 };
 

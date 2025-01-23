@@ -27,7 +27,7 @@ const handleChange = async (e: Event) => {
 
   files.value = Array.from(input.files).map((file: File) => ({
     rawFile: file,
-    uuid: Math.random().toString(36).substring(2),
+    uuid: Math.random().toString(36).substring(2) + Date.now().toString(36),
     file_name: file.name,
     file_size: file.size,
     file_type: file.type,
@@ -43,7 +43,7 @@ const handleChange = async (e: Event) => {
 
   const method = props.method || 'get';
   const route = props.route || '';
-  const chunkSize = props.chunkSize || 1024 * 1024;
+  const chunkSize = parseInt((props.chunkSize || 1) as string) * 1024 * 1024; // 1MB
   const chunkQueue: Chunk[] = [];
   const maxRetries = parseInt(props.maxRetries as string) || 3;
 
@@ -60,21 +60,22 @@ const handleChange = async (e: Event) => {
 
   async function breakFilesIntoChunks(file: ChunkifyFile) {
     const totalChunks = Math.ceil(
-      file.rawFile.size / parseInt(chunkSize as string)
+      file.rawFile.size / chunkSize
     );
 
     for (let i = 0; i < totalChunks; i++) {
-      const start = i * parseInt(chunkSize as string);
+      const start = i * chunkSize;
       const end = Math.min(
         file.rawFile.size,
-        start + parseInt(chunkSize as string)
+        start + chunkSize
       );
       const chunkData = file.rawFile.slice(start, end);
       chunkQueue.push({
         data: chunkData,
         reference: file.uuid,
-        total: totalChunks,
+        total_count: totalChunks,
         index: i,
+        extension: file.file_name.split('.').pop()?.toLowerCase()
       });
     }
   }
@@ -105,9 +106,11 @@ const handleChange = async (e: Event) => {
 
   async function uploadChunk(chunk: Chunk, restries: number) {
     const formData = new FormData();
-    formData.append("file", chunk.data);
-    formData.append("reference", chunk.reference);
-    formData.append("index", chunk.index.toString());
+    formData.append('chunk_data', chunk.data);
+    formData.append('chunk_reference', chunk.reference);
+    formData.append('chunk_index', chunk.index.toString());
+    formData.append('chunk_total_count', chunk.total_count.toString());
+    formData.append('chunk_extension', chunk.extension || '');
 
     await axios({
       method: method as Method,
@@ -141,7 +144,7 @@ const handleChange = async (e: Event) => {
               .filter(
                 (item: ChunkProgress) => item.reference === chunk.reference
               )
-              .reduce((acc, item) => acc + item.progress, 0) / chunk.total
+              .reduce((acc, item) => acc + item.progress, 0) / chunk.total_count
           );
         }
       },
