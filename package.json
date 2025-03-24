@@ -1,0 +1,48 @@
+{
+  "name": "vue-chunkify",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Upload files in chunks",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
+    "test": "echo 'Testing... OK'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codecreeper/vue-chunkify.git"
+  },
+  "keywords": [
+    "uploading",
+    "chunkify",
+    "chunking",
+    "file"
+  ],
+  "author": "Abdul Haseeb Khan",
+  "license": "ISC",
+  "main": "dist/vue-chunkify.cjs",
+  "module": "dist/vue-chunkify.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/vue-chunkify.es.js",
+    "require": "./dist/vue-chunkify.cjs"
+    
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "peerDependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vue-tsc": "^2.2.8"
+  },
+  "dependencies": {
+    "axios": "^1.8.4"
+  }
+}
