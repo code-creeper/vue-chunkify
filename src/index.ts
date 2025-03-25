@@ -1,20 +1,10 @@
 import type { App, Plugin } from "vue";
-import Chunkify from './components/Chunkify.vue';
-import type { ChunkifyOptions } from "./types.ts"
-
-const defaultOptions: ChunkifyOptions = {
-    route: 'string',
-    method: 'string',
-    multiple: true,
-    parallel: false,
-    numberOfChunks: 4,
-    chunkSize: 4000,
-    maxRetries: 3,
-}
+import Chunkify from '@/components/Chunkify.vue';
+import defaultOptions from "@/default-optins";
 
 const ChunkifyPlugin: Plugin = {
     install: (app: App, options = defaultOptions) => {
-        console.log(options);
+        console.log(options, 'plugin options');
 
         app.component('Chunkify', Chunkify)
     }
@@ -22,4 +12,4 @@ const ChunkifyPlugin: Plugin = {
 
 export default ChunkifyPlugin;
 export { Chunkify };
-export * from './types';
+export type { ChunkifyOptions, ChunkifyFile } from '@/types';

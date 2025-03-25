@@ -1,11 +1,14 @@
+import { AxiosResponse } from "axios";
+
 type ChunkifyOptions = {
-    route?: string;
-    method?: string;
-    multiple?: boolean;
-    parallel?: boolean;
-    numberOfChunks?: number | string;
-    chunkSize?: number | string;
-    maxRetries?: number | string;
+  route?: string;
+  method?: string;
+  multiple?: boolean;
+  parallel?: boolean;
+  numberOfChunks?: number | string;
+  chunkSize?: number | string;
+  maxRetries?: number | string;
+  onSuccess?: (response: AxiosResponse) => void
 };
 
 type ChunkifyFile = {
@@ -15,32 +18,25 @@ type ChunkifyFile = {
   file_size: number;
   file_type: string;
   url: string;
-  progress?: number;
+  progress: number;
+  uploadedBytes: number;
   abortController: AbortController;
-
-  abort: () => void;
 };
 
 type Chunk = {
-  data: Blob;
+  start: number;
+  end: number;
   reference: string;
   extension?: string;
   total_count: number;
   index: number;
 };
 
-type ChunkProgress = {
-  reference: string;
-  progress: number;
-  index: number;
-};
-
 type Status = 'pending' | 'uploading' | 'completed' | 'failed';
 
 export type {
-    ChunkifyOptions,
-    ChunkifyFile,
-    Chunk,
-    ChunkProgress,
-    Status
+  ChunkifyOptions,
+  ChunkifyFile,
+  Chunk,
+  Status
 }

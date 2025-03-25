@@ -27,7 +27,6 @@
     "types": "./dist/index.d.ts",
     "import": "./dist/vue-chunkify.es.js",
     "require": "./dist/vue-chunkify.cjs"
-    
   },
   "files": [
     "dist",
@@ -37,6 +36,7 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@types/node": "^22.13.12",
     "@vitejs/plugin-vue": "^5.2.3",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
