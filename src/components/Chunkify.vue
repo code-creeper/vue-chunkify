@@ -114,11 +114,11 @@ const handleChange = async (e: Event) => {
         const data = file.slice(chunk.start, chunk.end);
 
         const formData = new FormData();
-        formData.append('chunk_data', data);
-        formData.append('chunk_reference', chunk.reference);
-        formData.append('chunk_index', chunk.index.toString());
-        formData.append('chunk_total_count', chunk.total_count.toString());
-        formData.append('chunk_extension', chunk.extension || '');
+        formData.append('payload', data);
+        formData.append('file_reference', chunk.reference);
+        formData.append('chunk_number', chunk.index.toString());
+        formData.append('total_chunks', chunk.total_count.toString());
+        formData.append('file_extension', chunk.extension || '');
 
         await axios({
             method: method as Method,
